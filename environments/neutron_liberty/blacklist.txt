@@ -1,0 +1,30 @@
+# Regex file
+
+#
+# Blacklist for Liberty neutron tests
+#
+
+# Neutron flavors not enabled in OSPv8
+^neutron.tests.api.test_flavors_extensions
+
+# Neutron metering not enabled in OSPv8
+^neutron.tests.api.test_metering_extensions
+
+# Neutron VPN not required, likely not enabled
+^neutron.tests.api.test_vpnaas_extensions
+
+# Neutron AddressScope extension not enabled by OSPv8
+^neutron.tests.api.test_address_scopes
+
+# Neutron does not enable DHCPv6 by default
+^neutron.tests.api.test_dhcp_ipv6
+
+# Neutron subnet pools has no default subnetpool set
+^neutron.tests.api.test_subnetpools
+
+# IPv6 extended attributes for subnets not available
+^neutron.tests.api.test_networks.NetworksIpV6TestAttrs
+
+# LBaaSv1 is deprecated - EoSS April 15th 2017
+^neutron.tests.api.admin.test_quotas.QuotasTest.test_lbaas_quotas
+

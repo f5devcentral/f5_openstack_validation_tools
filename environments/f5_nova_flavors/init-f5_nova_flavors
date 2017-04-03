@@ -1,0 +1,49 @@
+#!/bin/bash
+
+export WORKINGDIRECTORY=/f5_nova_flavors
+
+. init-functions
+
+validate_os_creds
+
+flavor_exist=$(nova flavor-list|grep m1.bigip.1SLOT|wc -l)
+if [[ ! $flavor_exists == 1 ]]
+then
+    nova flavor-create --is-public true m1.bigip.1SLOT auto 2048 8 1 
+fi
+
+flavor_exist=$(nova flavor-list|grep m1.bigip.LTM.small|wc -l)
+if [[ ! $flavor_exists == 1 ]]
+then
+    nova flavor-create --is-public true m1.bigip.LTM.small auto 4096 40 2
+fi
+
+flavor_exist=$(nova flavor-list|grep m1.bigip.LTM.medium|wc -l)
+if [[ ! $flavor_exists == 1 ]]
+then
+    nova flavor-create --is-public true m1.bigip.LTM.medium auto 8192 40 4
+fi
+
+flavor_exist=$(nova flavor-list|grep m1.bigip.ALL.large|wc -l)
+if [[ ! $flavor_exists == 1 ]]
+then
+    nova flavor-create --is-public true m1.bigip.ALL.large auto 8192 160 4
+fi
+
+flavor_exist=$(nova flavor-list|grep m1.bigip.ALL.xlarge|wc -l)
+if [[ ! $flavor_exists == 1 ]]
+then
+    nova flavor-create --is-public true m1.bigip.ALL.xlarge auto 16384 160 8
+fi
+
+flavor_exist=$(nova flavor-list|grep m1.bigiq.small|wc -l)
+if [[ ! $flavor_exists == 1 ]]
+then
+    nova flavor-create --is-public true m1.bigiq.small auto 4096 160 2
+fi
+
+flavor_exist=$(nova flavor-list|grep m1.bigiq.medium|wc -l)
+if [[ ! $flavor_exists == 1 ]]
+then
+    nova flavor-create --is-public true m1.bigiq.medium auto 8192 160 4
+fi

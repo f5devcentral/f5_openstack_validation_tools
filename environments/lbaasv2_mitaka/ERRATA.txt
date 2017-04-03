@@ -1,0 +1,54 @@
+F5 LBaaSv2 Errata for OpenStack Mitaka
+
+---------------------------------------------------------------------------------------
+Notice of General Errata on Community Test Use of IPv4 localhost (127.0.0.1) Addressing
+---------------------------------------------------------------------------------------
+The community tests use localhost addresses for various test involving pool members. For proxy gateway devices, like F5 BIG-IPs, this address is invalid for a pool member. The community test have been altered to replace all instances of localhost IPv4 address space 127/8 with the legitimate 128/8 addresses.
+
+The following test files have been updated to replace reference to '127' to '128'.
+
+    neutron_lbaas/tests/tempest/v2/ddt/base_ddt.py
+    neutron_lbaas/tests/tempest/v2/api/test_members_admin.py
+    neutron_lbaas/tests/tempest/v2/api/test_members_non_admin.py
+
+---------------------------------------------------------------------------------------
+Exclusion of Test for Non-Functional Features with F5
+---------------------------------------------------------------------------------------
+
+The Neutron Network RBAC feature is not implemented in the F5 LBaaSv2 agent while it is being evaluated for scaling and security. The folllowing tests are blacklisted until Neutron Network RBAC is implemented.
+
+    neutron_lbaas.tests.tempest.v2.api.test_load_balancers_admin.LoadBalancersTestJSON.test_create_load_balancer_for_another_tenant
+    neutron_lbaas.tests.tempest.v2.api.test_load_balancers_admin.LoadBalancersTestJSON.test_create_load_balancer_missing_tenant_id_field_for_admin
+    neutron_lbaas.tests.tempest.v2.api.test_load_balancers_admin.LoadBalancersTestJSON.test_create_load_balancer_missing_tenant_id_for_other_tenant
+
+---------------------------------------------------------------------------------------
+Exclusion of Test for Testing Implementation Issues or Defects
+---------------------------------------------------------------------------------------
+
+The following test does not properly account for firewall behavior. F5 BIG-IP default security behavior is to send a TCP RST for any connection request to the device which has not configured L4 listener. The test validation waits for a socket timeout and does not properly hanlde the issuing of a RST. 
+
+    neutron_lbaas.tests.tempest.v2.scenario.test_listener_basic.TestListenerBasic.test_listener_basic
+
+
+The following test have python run-time errors under stable/mitaka.
+
+    All test referenced in the following python module:
+
+       neutron_lbaas.tests.tempest.v2.ddt.test_health_monitor_admin_state_up
+
+
+The following test are skipped because of a Neutron defect.
+
+    neutron_lbaas.tests.tempest.v2.api.test_pools_admin.TestPools.test_create_pool_for_another_tenant
+    neutron_lbaas.tests.tempest.v2.api.test_pools_admin.TestPools.test_create_pool_missing_tenant_id_for_admin
+    neutron_lbaas.tests.tempest.v2.api.test_pools_admin.TestPools.test_create_pool_missing_tenant_id_for_other_tenant
+
+
+---------------------------------------------------------------------------------------
+Exclusion of Test for F5 Defect
+---------------------------------------------------------------------------------------
+
+    Issue: https://github.com/F5Networks/f5-openstack-lbaasv2-driver/issues/463
+    neutron_lbaas.tests.tempest.v2.scenario.test_session_persistence.TestSessionPersistence.test_session_persistence
+
+

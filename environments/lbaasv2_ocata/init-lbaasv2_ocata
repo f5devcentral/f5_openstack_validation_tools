@@ -1,0 +1,15 @@
+#!/bin/bash
+
+WORKINGDIRECTORY=/lbaasv2_ocata
+export TEMPEST_CONFIG_DIR=$WORKINGDIRECTORY/etc
+
+. init-functions
+
+validate_os_creds
+validate_bigip_creds
+
+cd $WORKINGDIRECTORY
+. ./bin/activate
+./tools/populate-conf-from-env
+
+

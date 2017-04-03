@@ -1,0 +1,13 @@
+#!/bin/bash
+
+export WORKINGDIRECTORY=/image_importer
+export IMAGE_DIR=/bigip_images
+
+. init-functions
+
+validate_os_creds
+
+cd /image_importer
+python bigip_image_import.py
+cd /
+

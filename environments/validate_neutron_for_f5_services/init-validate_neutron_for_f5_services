@@ -1,0 +1,64 @@
+#!/bin/bash
+
+export WORKINGDIRECTORY=/image_importer
+export IMAGE_DIR=/bigip_images
+
+. init-functions
+
+validate_os_creds
+
+neutron ext-list > ext-list
+agent=$(cat ext-list | grep " agent" | wc -l)
+provider_net=$(cat ext-list | grep " provider" | wc -l)
+router=$(cat ext-list | grep " router " | wc -l)
+ha=$(cat ext-list | grep " allowed-address-pairs " | wc -l)
+lbaasv2=$(cat ext-list | grep " lbaasv2 " | wc -l)
+rm -rf ext-list
+
+valid_env=1
+
+if [[ ! $agent == 1 ]]
+then
+    echo "The f5 OpenStack agent will not work as Neutron does not support agents."
+    valid_env=0
+fi
+
+if [[ ! $provider_net == 1 ]]
+then
+    echo "You can not use TMOS Virtual Edition as a VTEP as Neutron does not support provider networks."
+    valid_env=0
+fi
+
+if [[ ! $router == 1 ]]
+then
+    echo "Neutron does not support logical routers or Floating IP allocations."
+    valid_env=0
+fi
+
+if [[ ! $ha == 1 ]]
+then
+    echo "Neutron does not support allowed-address-pairs, TMOS HA failover will likely not work."
+    valid_env=0
+fi
+
+if [[ ! $valid_env == 1 ]]
+then
+    echo " "
+    echo "Neutron deos not support core functionality which is used in F5 multi-tenant integrations."
+    echo " "
+else
+    echo " "
+    echo "Neutron reports it supports all the core functionality needed for F5 multi-tenant integrations."
+    echo " "
+fi
+
+if [[ ! $lbaasv2 == 1 ]]
+then
+    echo "Currently LBaaSv2 is not enabled in Neutron. "
+    echo "Follow the installation instructions here:"
+    echo " "
+    echo "http://f5-openstack-lbaasv2-driver.readthedocs.io/en/latest"
+    echo " "
+    echo "to enable the LBaaSv2 service and install a provider driver."
+fi
+

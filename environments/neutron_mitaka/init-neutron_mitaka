@@ -1,0 +1,14 @@
+#!/bin/bash
+
+WORKINGDIRECTORY=/neutron_mitaka
+export TEMPEST_CONFIG_DIR=$WORKINGDIRECTORY/etc
+
+. init-functions
+
+validate_os_creds
+
+cd $WORKINGDIRECTORY
+. ./bin/activate
+./tools/populate-conf-from-env
+
+

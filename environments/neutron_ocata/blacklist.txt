@@ -1,0 +1,33 @@
+# Regex file
+
+#
+# Blacklist for Mitaka neutron tests
+#
+
+# errantly does not respect neutron-server 500 error for DB colum issue
+^neutron.tests.api.admin.test_shared_network_extension.RBACSharedNetworksTest.test_create_rbac_policy_with_target_tenant_too_long_id
+
+# BGP tests to check for support so they can SKIP, not fail
+^neutron.tests.api.test_bgp
+
+# Metering extension does not properly check if it is supported so it can SKIP, not fail
+^neutron.tests.api.test_metering_extensions
+
+# QoS not required for f5 deployment, but has errant tests
+^neutron.tests.api.test_qos
+
+# Tests raises DB exception Column 'target_tenant' cannot be null without properly catching the exception
+^neutron.tests.api.admin.test_shared_network_extension.RBACSharedNetworksTest.test_create_rbac_policy_with_target_tenant_none
+
+# Neutron Flavors not enabled by OSPv9 by default
+^neutron.tests.api.test_flavors_extensions
+
+# Neutron does not define a default subnetpool OSPv9 by default
+^neutron.tests.api.test_auto_allocated_topology
+
+# Neutron does not enable DHCPv6 by default
+^neutron.tests.api.test_dhcp_ipv6
+
+# Timing error with running test after quota tests
+^neutron.tests.api.test_timestamp.TestTimeStamp.test_update_subnet_with_timestamp
+

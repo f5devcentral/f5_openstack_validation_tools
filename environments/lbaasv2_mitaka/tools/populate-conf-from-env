@@ -1,0 +1,74 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+if [[ ! -z $OS_AUTH_URL ]]
+then
+    CONTROLER_IP=$(echo $OS_AUTH_URL|cut -d'/' -f3|cut -d':' -f1)
+    sed -i s/__CONTROLLER__/$CONTROLER_IP/g $DIR/../etc/tempest.conf
+fi
+
+if [[ ! -z $OS_PASSWORD ]]
+then
+    sed -i s/__ADMIN_PASSWORD__/$OS_PASSWORD/g $DIR/../etc/tempest.conf
+fi
+
+for network in $(neutron net-list | tail -n +4 | head -n -1 | awk '{print $2}')
+do
+    is_external=$(neutron net-show $network|grep router:external|grep True|wc -l)
+    if [[ $is_external == 1 ]]
+    then
+        sed -i s/__EXTERNAL_NETWORK__/$network/g $DIR/../etc/tempest.conf
+        break
+    fi
+done
+
+if [[ ! -z $BIGIP_USERNAME ]]
+then
+    sed -i "s/icontrol_username.*/icontrol_username = $BIGIP_USERNAME/" $DIR/../etc/f5-agent.conf
+fi
+
+if [[ ! -z $BIGIP_PASSWORD ]]
+then
+    sed -i "s/icontrol_password.*/icontrol_password = $BIGIP_PASSWORD/" $DIR/../etc/f5-agent.conf
+fi
+
+if [[ ! -z $BIGIP_ENVIRONMENT_PREFIX ]]
+then
+    sed -i "s/environment_prefix.*/environment_prefix = $BIGIP_ENVIRONMENT_PREFIX/" $DIR/../etc/f5-agent.conf
+fi
+
+agent_id=$(neutron agent-list | grep f5-oslbaasv2-agent | grep ':-)' | awk '{print $2}')
+if [[ ${agent_id//-/} =~ ^[[:xdigit:]]{32}$ ]]
+then
+    env_prefix=$(neutron agent-show $agent_id | grep environment_prefix | awk '{print $4}' | sed -e 's/^"//' -e 's/",$//')
+    if [[ "$env_prefix" == "$BIGIP_ENVIRONMENT_PREFIX" ]]
+    then
+        icontrol_endpoints=$(neutron agent-show $agent_id -F configurations -f json | python -c 'import sys,json; data=json.loads(sys.stdin.read()); eps=json.loads(data[0]["Value"]); print ",".join(eps["icontrol_endpoints"].keys())')
+        sed -i "s/icontrol_hostname.*/icontrol_hostname = $icontrol_endpoints/" $DIR/../etc/f5-agent.conf
+    fi
+fi
+
+download_cirros=1
+
+for image in $(nova image-list | tail -n +4 | head -n -1 | awk '{print $2}')
+do
+    is_cirros=$(nova image-show $image|grep cirros|wc -l)
+    if [[ $is_cirros == 1 ]]
+    then
+        sed -i s/__CIRROS_IMAGE_ID__/$image/g $DIR/../etc/tempest.conf
+        download_cirros=0
+        break
+    fi
+done
+
+if [[ $download_cirros == 1 ]]
+then
+    echo "downloading cirros image for scenario testing"
+    curl http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img -o /tmp/cirros.img
+    glance image-create --architecture x86_64 --protected False --name cirros-os-image --container-format bare --disk-format qcow2 --file /tmp/cirros.img
+    image_id=$(glance image-list|grep cirros-os-image | awk '{print $2}')
+    glance image-update $image_id --property visibility=public
+    sed -i s/__CIRROS_IMAGE_ID__/$image_id/g $DIR/../etc/tempest.conf
+fi
+

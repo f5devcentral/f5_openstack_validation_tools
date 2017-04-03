@@ -1,0 +1,41 @@
+# Regex file
+
+#
+# Blacklist for Ocata neutron-lbaas tests
+#
+
+# Test for Non-supported Features
+#
+# Neutron Network RBAC
+^neutron_lbaas.tests.tempest.v2.api.test_load_balancers_admin.LoadBalancersTestJSON.test_create_load_balancer_for_another_tenant
+^neutron_lbaas.tests.tempest.v2.api.test_load_balancers_admin.LoadBalancersTestJSON.test_create_load_balancer_missing_tenant_id_field_for_admin
+^neutron_lbaas.tests.tempest.v2.api.test_load_balancers_admin.LoadBalancersTestJSON.test_create_load_balancer_missing_tenant_id_for_other_tenant
+
+#
+# Tests which are invalid for F5 environment
+#
+#    Test expects TCP socker timeout for request set to deleted listner
+#    F5 BIG-IP acts as firewall and issues explicit TCP RSTs thus socket is RST, not timed out
+^neutron_lbaas.tests.tempest.v2.scenario.test_listener_basic.TestListenerBasic.test_listener_basic
+
+#
+# Test which product known bugs with F5 environment
+#
+# Bug: https://github.com/F5Networks/f5-openstack-lbaasv2-driver/issues/463
+^neutron_lbaas.tests.tempest.v2.scenario.test_session_persistence.TestSessionPersistence.test_session_persistence
+
+#
+# Broken or invalid community tests
+#
+# TypeError: unbound method _create_health_monitor() must be called with CreateHealthMonitorAdminStateTest instance as first argument (got nothing instead)
+^neutron_lbaas.tests.tempest.v2.ddt.test_health_monitor_admin_state_up
+
+#
+# Skipped community tests
+#
+# neutron_lbaas.tests.tempest.v2.api.test_pools_admin.TestPools.test_create_pool_for_another_tenant ... SKIPPED: Skipped until Bug: 1468457 is resolved.
+^neutron_lbaas.tests.tempest.v2.api.test_pools_admin.TestPools.test_create_pool_for_another_tenant
+# neutron_lbaas.tests.tempest.v2.api.test_pools_admin.TestPools.test_create_pool_missing_tenant_id_for_admin ... SKIPPED: Skipped until Bug: 1468457 is resolved.
+^neutron_lbaas.tests.tempest.v2.api.test_pools_admin.TestPools.test_create_pool_missing_tenant_id_for_admin
+# neutron_lbaas.tests.tempest.v2.api.test_pools_admin.TestPools.test_create_pool_missing_tenant_id_for_other_tenant ... SKIPPED: Skipped until Bug: 1468457 is resolved.
+^neutron_lbaas.tests.tempest.v2.api.test_pools_admin.TestPools.test_create_pool_missing_tenant_id_for_other_tenant

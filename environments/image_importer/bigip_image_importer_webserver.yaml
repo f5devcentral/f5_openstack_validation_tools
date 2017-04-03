@@ -1,0 +1,136 @@
+heat_template_version: 2015-04-30
+
+description: Launch an Ubuntu server, create security group policy for it, and add Apache web server package
+
+parameters:
+
+  web_app_image:
+    type: string
+    label: Web App Image
+    description: The image to be used for the web applicatoin.
+    constraints:
+      - custom_constraint: glance.image 
+  web_app_flavor:
+    type: string
+    label: Web App Flavor
+    description: Type of instance (flavor) to be used for the web application.
+    default: m1.medium
+    constraints:
+      - custom_constraint: nova.flavor
+  external_network:
+    type: string
+    label: External Network
+    description: Specify a specific Neutron external network for Floating IP creation.
+    default: public 
+    constraints:
+      - custom_constraint: neutron.network
+
+parameter_groups:
+  - parameters:
+    - web_app_image
+    - web_app_flavor
+  - parameters:
+    - external_network
+
+resources:
+
+  web_app_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: web_app_security_group
+      description: security group rules for web application server
+      rules:
+        - remote_ip_prefix: 0.0.0.0/0
+          protocol: icmp
+        - remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          port_range_min: 22
+          port_range_max: 22
+        - remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          port_range_min: 80
+          port_range_max: 80
+
+  importer_network:
+    type: OS::Neutron::Net
+    properties:
+        name: importer_network
+
+  importer_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: { get_resource: importer_network }
+      cidr: 192.168.254.0/24
+      allocation_pools: 
+        - {start: 192.168.254.100, end: 192.168.254.200}
+      gateway_ip: 192.168.254.1
+      dns_nameservers:
+        - 8.8.8.8
+        - 8.8.4.4
+      ip_version: 4
+      
+  importer_router:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info: {"network": { get_param: external_network } }
+      name: importer_router
+
+  importer_router_interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router: { get_resource: importer_router }
+      subnet: { get_resource: importer_subnet }
+
+  web_server_port:
+    type: OS::Neutron::Port
+    depends_on: web_app_security_group
+    properties:
+      network: { get_resource: importer_network }
+      security_groups:
+        - web_app_security_group
+
+  web_server_floatingip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: { get_param: external_network }
+      port_id: { get_resource: web_server_port }
+
+  web_server:
+    type: OS::Nova::Server
+    properties:
+      image: { get_param: web_app_image }
+      flavor: { get_param: web_app_flavor }
+      config_drive: true
+      networks:
+        - port: { get_resource:  web_server_port }
+      user_data_format: RAW
+      user_data: |
+            #cloud-config
+            password: openstack
+            chpasswd: { expire: False }
+            ssh_pwauth: True
+            packages:
+              - apache2
+            
+outputs:
+  import_network_id:
+    description: Importer Network
+    value: { get_resource: importer_network }
+  importer_subnet_id:
+    description: Importer Subnet
+    value: { get_resource: importer_subnet }
+  importer_router_id:
+    description: Importer Router
+    value: { get_resource: importer_router }
+  web_server_name:
+    description: Name of the instance
+    value: { get_attr: [web_server, name] }
+  web_server_instance_id:
+    description: ID of the instance
+    value: { get_resource: web_server }
+  web_server_ip:
+    description: The IP address of the web server instance
+    value: { get_attr: [web_server_port, fixed_ips, 0, ip_address] }
+  web_server_public_ip:
+    description: The public IP address of the web server instance
+    value: { get_attr: [web_server_floatingip, floating_ip_address] }

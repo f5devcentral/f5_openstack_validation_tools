@@ -1,0 +1,90 @@
+#!/bin/bash
+
+function validate_os_creds() {
+    if [[ -z ${OS_USERNAME}  ||  -z ${OS_PASSWORD}  ||  -z ${OS_TENANT_NAME}  ||  -z ${OS_AUTH_URL} ]]
+    then 
+    	if [ -f "$WORKINGDIRECTORY/openstackrc" ]
+    	then
+    		source $WORKINGDIRECTORY/openstackrc
+    	fi
+    	
+    	if [ -z ${OS_TENANT_NAME} ]
+    	then
+        	echo -n "OpenStack Tenant: "
+        	read OS_TENANT_NAME;
+        	if ! [ ${OS_TENANT_NAME} == 'admin' ]
+        	then
+        		echo ""
+ 				echo "This tool only works with the admin tenant."
+ 				rm $WORKINGDIRECTORY/openstackrc
+ 				echo ""
+ 				exit 1
+        	fi
+        	export OS_TENANT_NAME="${OS_TENANT_NAME}"
+        	echo "export OS_TENANT_NAME=\"${OS_TENANT_NAME}\"" >> $WORKINGDIRECTORY/openstackrc
+    	fi
+    
+    	if [ -z ${OS_USERNAME} ]
+    	then
+        	echo -n "OpenStack Username: "
+        	read OS_USERNAME;
+        	export OS_USERNAME="${OS_USERNAME}"
+        	echo "export OS_USERNAME=\"${OS_USERNAME}\"" >> $WORKINGDIRECTORY/openstackrc
+    	fi
+      
+    	if [ -z ${OS_PASSWORD} ]
+    	then
+        	echo -n "OpenStack Password: "
+        	read -sr OS_PASSWORD;
+        	export OS_PASSWORD="${OS_PASSWORD}"
+        	echo ""
+    	fi
+        
+    	if [ -z ${OS_AUTH_URL} ]
+    	then
+        	echo -n "OpenStack Auth URL : "
+        	read OS_AUTH_URL;
+        	export OS_AUTH_URL="${OS_AUTH_URL}"
+        	echo "export OS_AUTH_URL=\"${OS_AUTH_URL}\"" >> $WORKINGDIRECTORY/openstackrc
+    	fi
+    fi
+}
+
+function validate_bigip_creds() {
+    if [[ -z ${BIGIP_USERNAME} || -z ${BIGIP_PASSWORD} || -z ${BIGIP_ENVIRONMENT_PREFIX} ]]
+    then
+        if [ -f "$WORKINGDIRECTORY/bigiprc" ]
+        then
+                source $WORKINGDIRECTORY/bigiprc
+        fi
+    
+        if [ -z ${BIGIP_USERNAME} ]
+        then
+                echo -n "BIG-IP Username: "
+                read BIGIP_USERNAME;
+                export BIGIP_USERNAME="${BIGIP_USERNAME}"
+                echo "export BIGIP_USERNAME=\"${BIGIP_USERNAME}\"" >> $WORKINGDIRECTORY/bigiprc
+        fi
+
+        if [ -z ${BIGIP_PASSWORD} ]
+        then
+                echo -n "BIG-IP Password: "
+                read -sr BIGIP_PASSWORD;
+                export BIGIP_PASSWORD="${BIGIP_PASSWORD}"
+                echo ""
+        fi
+
+        if [ -z ${BIGIP_ENVIRONMENT_PREFIX} ]
+        then
+                echo -n "F5 Agent Environment Prefix: "
+                read BIGIP_ENVIRONMENT_PREFIX;
+                export BIGIP_ENVIRONMENT_PREFIX="${BIGIP_ENVIRONMENT_PREFIX}"
+                echo "export BIGIP_ENVIRONMENT_PREFIX=\"${BIGIP_ENVIRONMENT_PREFIX}\"" >> $WORKINGDIRECTORY/bigiprc
+        fi
+    fi
+}
+
+function finished() {
+    [ "$VIRTUAL_ENV" ] && deactivate && cd / 	
+}
+
