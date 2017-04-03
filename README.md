@@ -11,7 +11,7 @@ For environments which require their own version of tools,  the installation pro
 Clone the git repository to a host with docker installed.
 
 ```
-  git clone https://github.com/jgruber/f5_openstack_validation_tools.git
+  git clone https://github.com/f5devcentral/f5_openstack_validation_tools.git
 ```
 
 Edit the Dockerfile to enable the testing environments you wish to build. Remove the comment hash before the line setting the environment enabled variable for the container.
