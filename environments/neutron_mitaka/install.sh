@@ -29,7 +29,7 @@ mkdir $DIR/build
 # liberty-eol version of neutron-lbaas
 cd $DIR/build
 
-git clone -b stable/mitaka https://github.com/openstack/neutron.git
+git clone -b mitaka-eol https://github.com/openstack/neutron.git
 cd $DIR/build/neutron
 mv $DIR/build/neutron/neutron $DIR/neutron
 mv $DIR/build/neutron/requirements.txt $DIR/neutron/requirements.txt

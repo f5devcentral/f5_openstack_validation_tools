@@ -4,16 +4,13 @@ MAINTAINER John Gruber "j.gruber@f5.com"
 # add the CentOS Mitaka repo as a starting point
 RUN yum -y install centos-release-openstack-mitaka
 RUN yum -y update
-# install development tools for environment builds
-RUN yum -y groups mark install "Development Tools"
-RUN yum -y groups mark convert "Development Tools"
-RUN yum -y groupinstall "Development Tools"
 # install what we need for environemnt build and to 
 # make the test client a good diagnostic tool.
-RUN yum -y install ansible openssl-devel libffi libffi-devel python-devel git python-pip python-openstackclient python-heatclient
+RUN yum -y install gcc g++ ansible openssl-devel libffi libffi-devel python-devel git python-pip python-openstackclient python-heatclient
 
 # update key python tools and libraries
-RUN pip install --upgrade pip setuptools virtualenv tempest ipython
+RUN pip install --upgrade pip setuptools virtualenv tempest 
+RUN pip install ipython
 
 # add interesting f5 tools
 RUN git clone -b mitaka https://github.com/F5Networks/f5-openstack-agent.git
@@ -41,17 +38,23 @@ ENV enable_neutron_mitaka=1
 # test neutron lbaasv2 in a mitaka openstack cloud 
 ENV enable_lbaasv2_mitaka=1
 
+# test f5 lbaasv2 driver in a mitaka openstack cloud
+ENV enable_lbaasv2_f5driver_mitaka=1
+
+# test f5 lbaasv2 driver in a Red Hat OSPv9 cloud
+ENV enable_lbaasv2_redhat_ospv9=1
+
 # test neutron in a newton openstack cloud
-# ENV enable_neutron_newton=1
+ENV enable_neutron_newton=1
 
 # test neutron lbaasv2 in a newton openstack cloud 
-# ENV enable_lbaasv2_newton=1
+ENV enable_lbaasv2_newton=1
 
 # test neutron in a ocata openstack cloud
-# ENV enable_neutron_ocata=1
+ENV enable_neutron_ocata=1
 
 # test neutron lbaasv2 in a ocata openstack cloud 
-# ENV enable_lbaasv2_ocata=1
+ENV enable_lbaasv2_ocata=1
 
 # create TMOS Virtual Edition images for OpenStack
 ENV enable_image_importer=1
